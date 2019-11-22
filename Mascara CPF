@@ -1,0 +1,2 @@
+— considerando que o cpf seja varchar
+replace(to_char(cpf::bigint, ‘000:000:000-00’), ‘:’, ‘.’)
