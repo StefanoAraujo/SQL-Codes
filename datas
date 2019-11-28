@@ -1,0 +1,116 @@
+Formatação de Data e Hora com as funções TO_CHAR e TO_DATE
+Dados do tipo data e hora apresentam muitas variações de formatação. Para o usuário as datas se apresentam como campos textuais, mas para o SGBD, são tipos de dados específicos, com características próprias, representando valores temporais. Para trabalhar com valores deste tipo, os sistemas fazem frequentemente conversões entre esses dois tipos.
+
+Este post apresenta o uso das funções TO_DATE e TO_CHAR para formatar e tratar datas e horas.
+
+* TO_CHAR - Formatando campos do tipo data para texto.
+
+- Exemplo 1: Formatação padrão
+
+postgres=# SELECT TO_CHAR(current_date, 'DD-MM-YYYY');
+  to_char  
+------------
+ 17-06-2013
+(1 registro)
+- Exemplo 2: Formatação padrão utilizando o separador "/"
+
+postgres=# SELECT TO_CHAR(current_date, 'DD/MM/YYYY');
+  to_char  
+------------
+ 17/06/2013
+(1 registro)
+- Exemplo 3: Alterando a ordem de visualização do mês, dia e ano apresentados.
+
+postgres=# SELECT TO_CHAR(current_date, 'DD-MM-YYYY'), TO_CHAR(current_date, 'MM-DD-YYYY'), TO_CHAR(current_date, 'YYYY-MM-YY');
+  to_char   |  to_char   |  to_char  
+------------+------------+------------
+ 17-06-2013 | 06-17-2013 | 2013-06-13
+(1 registro)
+- Exemplo 4: Separando mês, dia e ano em campos distintos.
+
+postgres=# SELECT TO_CHAR(current_date, 'DD') AS DIA, TO_CHAR(current_date, 'MM') AS MES, TO_CHAR(current_date, 'YYYY') AS ANO;
+ dia | mes | ano 
+-----+-----+------
+ 17  | 06  | 2013
+(1 registro)
+- Exemplo 5: Apresentando o mês e o dia por extenso.
+
+postgres=# SELECT TO_CHAR(current_date, 'DAY') AS DIA, TO_CHAR(current_date, 'MON') AS MES;
+    dia    | mes
+-----------+-----
+ MONDAY    | JUN
+(1 registro)
+- Exemplo 6: Apresentando a hora do sistema formatada.
+
+postgres=# SELECT TO_CHAR(current_timestamp, 'HH24:MI:SS');
+ to_char 
+----------
+ 07:29:13
+(1 registro)
+- Exemplo 7: Separando hora, minuto e segundos em camops distintos.
+
+postgres=# SELECT TO_CHAR(current_timestamp, 'HH24'), TO_CHAR(current_timestamp, 'MI'), TO_CHAR(current_timestamp, 'SS');
+ to_char | to_char | to_char
+---------+---------+---------
+ 07      | 29      | 13
+(1 registro)
+- Exemplo 8: Usando TO_CHAR para inserção e atualização de dados.
+
+postgres=#
+postgres=# CREATE TABLE char_date_tst (momento varchar(10));
+CREATE TABLE
+postgres=# INSERT INTO char_date_tst (momento) VALUES (TO_CHAR(current_date, 'MM-DD-YYYY'));
+INSERT 0 1
+postgres=# UPDATE char_date_tst SET momento = '01-05-2010' WHERE momento = TO_CHAR(current_date, 'MM-DD-YYYY');
+UPDATE 1
+postgres=# SELECT * FROM char_date_tst;
+  momento  
+------------
+ 01-05-2010
+(1 registro)
+* TO_DATE - Formatando campos do tipo texto para data.
+
+- Exemplo 1: Usando TO_DATE para data em formato DD-MM-YYYY.
+
+postgres=# SELECT TO_DATE('30-04-2010', 'DD-MM-YYYY');
+  to_date  
+------------
+ 2010-04-30
+(1 registro)
+- Exemplo 2: Usando TO_DATE para data em formato MM-DD-YYYY.
+
+postgres=# SELECT TO_DATE('04-30-2010', 'MM-DD-YYYY');
+  to_date  
+------------
+ 2010-04-30
+(1 registro)
+- Exemplo 3: Usando TO_DATE para data com separador "/"
+
+postgres=# SELECT TO_DATE('04/30/2010', 'MM/DD/YYYY');
+  to_date  
+------------
+ 2010-04-30
+(1 registro)
+- Exemplo 4: Teste de igualdade entre datas de formatos distintos usando TO_DATE.
+
+postgres=# SELECT TO_DATE('04-30-2010', 'MM-DD-YYYY') = TO_DATE('30-04-2010', 'DD-MM-YYYY') AS IGUALDADE;
+ igualdade
+-----------
+ t
+(1 registro)
+- Exemplo 5: Usando TO_DATE para inserção e atualização de dados.
+
+postgres=# CREATE TABLE date_tst (momento date);
+CREATE TABLE
+postgres=# INSERT INTO date_tst VALUES (TO_DATE('04-30-2010', 'MM-DD-YYYY'));
+INSERT 0 1
+postgres=# UPDATE date_tst SET momento = momento + 1 WHERE momento = TO_DATE('04-30-2010', 'MM-DD-YYYY');
+UPDATE 1
+postgres=# SELECT * FROM date_tst;
+  momento  
+------------
+ 2010-05-01
+(1 registro)
+* Considerações Finais
+
+Os exemplos acima não cobrem todas as possibilidades, mas podem ajudar nas principais operações que lidem com a formatação de datas e horas no postgresql. A cláusula CAST é uma alternativa para conversão entre estes tipos de dados, mas não realiza formatações sobre os mesmos.
